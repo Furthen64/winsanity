@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="WUWatch.Tests/WUWatch.Tests.csproj" />
+  <Project Path="WUWatch/WUWatch.csproj" />
+</Solution>
