@@ -16,4 +16,8 @@
     <PackageReference Include="System.Management" Version="10.0.12" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="WUWatch.Tests" />
+  </ItemGroup>
+
 </Project>

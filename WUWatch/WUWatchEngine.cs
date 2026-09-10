@@ -26,6 +26,9 @@ public sealed class WUWatchEngine
     public double CurrentDiskActiveTimePercent { get; private set; }
     public double CpuRollingAverage => _cpuAverage.CurrentAverage;
     public double DiskRollingAverage => _diskAverage.CurrentAverage;
+    public int AverageSampleCount => _diskAverage.SampleCount;
+    public int AverageWindowSeconds => _settings.WarningAverageSeconds;
+    public bool AveragesWarmingUp => AverageSampleCount < AverageWindowSeconds;
 
     public IReadOnlyList<EpisodeEntry> Entries { get; } = new List<EpisodeEntry>();
 

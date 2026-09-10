@@ -83,7 +83,8 @@ public sealed class WarningForm : Form
         {
             Text = "Hold to Dismiss (3 sec)",
             Dock = DockStyle.Bottom,
-            Height = 40
+            Height = 40,
+            Visible = false
         };
         _dismissButton.MouseDown += OnDismissButtonDown;
         _dismissButton.MouseUp += OnDismissButtonUp;
@@ -115,11 +116,20 @@ public sealed class WarningForm : Form
 
         _titleLabel.BackColor = Color.Red;
         _titleLabel.ForeColor = Color.White;
+        _dismissButton.Visible = engine.State == AppState.Warning;
 
         _diskLabel.Text = $"{engine.CurrentDiskActiveTimePercent:F1}%";
-        _diskAvgLabel.Text = $"{engine.DiskRollingAverage:F1}%";
         _cpuLabel.Text = $"{engine.CurrentCpuPercent:F1}%";
-        _cpuAvgLabel.Text = $"{engine.CpuRollingAverage:F1}%";
+
+        bool warmingUp = engine.AveragesWarmingUp;
+        string warmup = $"  (warming up {engine.AverageSampleCount}/{engine.AverageWindowSeconds})";
+
+        _diskAvgLabel.Text = engine.DiskRollingAverage.ToString("F1") + "%" + (warmingUp ? warmup : "");
+        _cpuAvgLabel.Text = engine.CpuRollingAverage.ToString("F1") + "%" + (warmingUp ? warmup : "");
+
+        Color avgColor = warmingUp ? Color.OrangeRed : Color.Black;
+        _diskAvgLabel.ForeColor = avgColor;
+        _cpuAvgLabel.ForeColor = avgColor;
 
         _episodeStartLabel.Text = engine.FirstEventTime?.ToString("HH:mm:ss") ?? "N/A";
         _lastEventLabel.Text = engine.LastUpdateEventTime == DateTime.MinValue
@@ -140,6 +150,13 @@ public sealed class WarningForm : Form
 
     private void OnDismissButtonDown(object? sender, MouseEventArgs e)
     {
+        if (_dismissTimer != null)
+        {
+            _dismissTimer.Stop();
+            _dismissTimer.Dispose();
+            _dismissTimer = null;
+        }
+
         _dismissButtonDownTime = DateTime.Now;
         _dismissTimer = new System.Windows.Forms.Timer { Interval = 100 };
         _dismissTimer.Tick += OnDismissTimerTick;
@@ -185,6 +202,12 @@ public sealed class WarningForm : Form
     {
         if (e.CloseReason == CloseReason.UserClosing)
         {
+            if (_context.Engine.State != AppState.Warning)
+            {
+                e.Cancel = false;
+                return;
+            }
+
             var result = MessageBox.Show(
                 "Windows Update activity is still being monitored.\n\n" +
                 "Closing this warning may hide ongoing system load.",

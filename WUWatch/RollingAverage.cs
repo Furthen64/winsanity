@@ -7,7 +7,7 @@ public sealed class RollingAverage
 
     public RollingAverage(int windowSize)
     {
-        _windowSize = windowSize;
+        _windowSize = Math.Max(1, windowSize);
     }
 
     public void AddSample(double value)

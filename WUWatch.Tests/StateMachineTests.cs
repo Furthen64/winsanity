@@ -55,6 +55,24 @@ public class StateMachineTests
     }
 
     [Fact]
+    public void AveragesReportWarmupUntilWindowFilled()
+    {
+        var (engine, _) = CreateArmedEngine();
+
+        engine.RecordLoadSample(10, 10);
+        Assert.True(engine.AveragesWarmingUp);
+        Assert.Equal(1, engine.AverageSampleCount);
+
+        for (int i = 1; i < engine.AverageWindowSeconds; i++)
+        {
+            engine.RecordLoadSample(10, 10);
+        }
+
+        Assert.False(engine.AveragesWarmingUp);
+        Assert.Equal(engine.AverageWindowSeconds, engine.AverageSampleCount);
+    }
+
+    [Fact]
     public void OrSemantics_WarningTriggersWhenOnlyDiskAboveThreshold()
     {
         var (engine, _) = CreateArmedEngine();

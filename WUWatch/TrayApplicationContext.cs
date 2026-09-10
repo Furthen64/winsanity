@@ -12,6 +12,7 @@ public sealed class TrayApplicationContext : ApplicationContext
     private readonly SynchronizationContext? _uiContext;
 
     private WarningForm? _warningForm;
+    private bool _disposed;
 
     public TrayApplicationContext()
     {
@@ -159,12 +160,17 @@ public sealed class TrayApplicationContext : ApplicationContext
 
     private void OnStatus(object? sender, EventArgs e)
     {
+        string warmupNote = _engine.AveragesWarmingUp
+            ? $"\nNote: averages warming up ({_engine.AverageSampleCount}/{_engine.AverageWindowSeconds} of {_engine.AverageWindowSeconds} sec)"
+            : "";
+
         MessageBox.Show(
             $"Current state: {_engine.State}\n\n" +
             $"Disk active time: {_engine.CurrentDiskActiveTimePercent:F1}%\n" +
             $"Disk average: {_engine.DiskRollingAverage:F1}%\n" +
             $"CPU: {_engine.CurrentCpuPercent:F1}%\n" +
-            $"CPU average: {_engine.CpuRollingAverage:F1}%",
+            $"CPU average: {_engine.CpuRollingAverage:F1}%" +
+            warmupNote,
             "WUWatch Status",
             MessageBoxButtons.OK,
             MessageBoxIcon.Information);
@@ -254,6 +260,9 @@ public sealed class TrayApplicationContext : ApplicationContext
 
     protected override void Dispose(bool disposing)
     {
+        if (_disposed) return;
+        _disposed = true;
+
         if (disposing)
         {
             _stateTimer.Dispose();

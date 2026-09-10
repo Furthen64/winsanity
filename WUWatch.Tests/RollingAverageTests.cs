@@ -48,4 +48,20 @@ public class RollingAverageTests
         Assert.Equal(0, avg.CurrentAverage);
         Assert.Equal(0, avg.SampleCount);
     }
+
+    [Fact]
+    public void ZeroWindowSizeIsClampedToMinimum()
+    {
+        var avg = new RollingAverage(0);
+        avg.AddSample(100);
+        Assert.Equal(100, avg.CurrentAverage, precision: 6);
+    }
+
+    [Fact]
+    public void NegativeWindowSizeIsClampedToMinimum()
+    {
+        var avg = new RollingAverage(-5);
+        avg.AddSample(100);
+        Assert.Equal(100, avg.CurrentAverage, precision: 6);
+    }
 }

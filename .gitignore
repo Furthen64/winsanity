@@ -44,6 +44,11 @@ ScaffoldingReadMe.txt
 *~
 CodeCoverage/
 
+# WUWatch build artifacts
+installer/publish/
+installer/output/
+/output/
+
 # MSBuild Binary and Structured Log
 *.binlog
 
